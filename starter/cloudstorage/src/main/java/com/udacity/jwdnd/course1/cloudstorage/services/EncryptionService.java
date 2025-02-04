@@ -15,44 +15,46 @@ import java.util.Base64;
 
 @Service
 public class EncryptionService {
-    private Logger logger = LoggerFactory.getLogger(EncryptionService.class);
+
+    private final Logger logger = LoggerFactory.getLogger(EncryptionService.class);
 
     public String encryptValue(String data, String key) {
-        byte[] encryptedValue = null;
-
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
+            SecretKey secretKey = getAESKey(key);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            encryptedValue = cipher.doFinal(data.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
-                | UnsupportedEncodingException | IllegalBlockSizeException | BadPaddingException e) {
-            logger.error(e.getMessage());
+            byte[] encryptedValue = cipher.doFinal(data.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(encryptedValue);
+        } catch (Exception e) {
+            logger.error("Error encrypting value: " + e.getMessage());
         }
-
-        return Base64.getEncoder().encodeToString(encryptedValue);
+        return null;
     }
 
     public String decryptValue(String data, String key) {
-        byte[] decryptedValue = null;
-
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
+            SecretKey secretKey = getAESKey(key);
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            decryptedValue = cipher.doFinal(Base64.getDecoder().decode(data));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException
-                | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            logger.error(e.getMessage());
+            byte[] decryptedValue = cipher.doFinal(Base64.getDecoder().decode(data));
+            return new String(decryptedValue, "UTF-8");
+        } catch (Exception e) {
+            logger.error("Error decrypting value: " + e.getMessage());
         }
-
-        return new String(decryptedValue);
+        return null;
     }
-    public String getEncryptionKey(){
+
+    public String getEncryptionKey() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
-        String encodedSalt = Base64.getEncoder().encodeToString(salt);
-        return encodedSalt;
+        return Base64.getEncoder().encodeToString(salt);
+    }
+
+    private SecretKey getAESKey(String key) throws UnsupportedEncodingException {
+        byte[] keyBytes = new byte[16];
+        byte[] keyInputBytes = key.getBytes("UTF-8");
+        System.arraycopy(keyInputBytes, 0, keyBytes, 0, Math.min(keyInputBytes.length, 16));
+        return new SecretKeySpec(keyBytes, "AES");
     }
 }

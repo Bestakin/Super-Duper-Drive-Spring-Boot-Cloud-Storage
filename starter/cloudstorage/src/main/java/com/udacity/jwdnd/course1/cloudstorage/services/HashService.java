@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -14,24 +15,22 @@ import java.util.Base64;
 @Component
 public class HashService {
 
-    private final Logger logger = LoggerFactory.getLogger(HashService.class);
-
     public String getHashedValue(String data, String salt) {
         byte[] hashedValue = null;
 
-//        int iterCount = 12288;
-//        int derivedKeyLength = 256;
-        KeySpec spec = new PBEKeySpec(data.toCharArray(), salt.getBytes(), 5000, 128);
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            hashedValue = factory.generateSecret(spec).getEncoded();
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            logger.error(e.getMessage());
-//            logger.error("Error while hashing: {}", e.getMessage()); // Log the error
-//            e.printStackTrace();
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt.getBytes());
+            hashedValue = md.digest(data.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
         }
 
-        return Base64.getEncoder().encodeToString(hashedValue);
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hashedValue) {
+            hexString.append(Integer.toHexString(0xFF & b));
+        }
+        return hexString.toString();
     }
 
 }
