@@ -19,7 +19,7 @@ A Spring Boot web application that provides secure cloud storage features, inclu
 ## Quick Start
 ./mvnw spring-boot:run
 
-Visit: http://localhost:8080
+Visit: http://localhost:9999
 
 ## Default pages:
 
