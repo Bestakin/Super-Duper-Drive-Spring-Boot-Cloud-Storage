@@ -54,6 +54,8 @@ Below is a walkthrough of the app features:
 <img width="556" height="576" alt="image" src="https://github.com/user-attachments/assets/a39eb0af-294c-4fbe-bb45-bb33d6c52199" />
 
 Error message if wrong password: 
+
+
 <img width="560" height="552" alt="image" src="https://github.com/user-attachments/assets/89195678-8064-4be9-af01-f86ab29033f8" />
 
 ### Home page – Files tab
